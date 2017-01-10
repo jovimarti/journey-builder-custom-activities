@@ -28,7 +28,7 @@
         }
     },
     "configurationArguments": {
-        "applicationExtensionKey": "custom-with-running-view",
+        "applicationExtensionKey": "Rest11",
         "save": {
             "url": "URI/for/your/activity/save",
             "body": "",

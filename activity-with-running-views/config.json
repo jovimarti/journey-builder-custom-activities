@@ -42,7 +42,7 @@
             "useJwt": false
         },
         "validate": {
-            "url": "https://posttestserver.com/post.php?dir=jb_testBed_v1.1_rest_activity_execute",
+            "url": "https://posttestserver.com/post.php?dir=jb_testBed_v1.1_rest_activity_validate",
             "verb": "POST",
             "body": "",
             "useJwt": false

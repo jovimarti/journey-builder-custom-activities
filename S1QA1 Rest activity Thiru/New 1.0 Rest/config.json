@@ -1,0 +1,65 @@
+{
+    "workflowApiVersion": "1.0",
+    "metaData": {
+        "icon": "images/sms.png",
+        "iconSmall": "images/smsSmall.png",
+        "category": "message",
+        "version": "2.0"
+    },
+    "type": "Rest",
+    "lang": {
+        "en-US": {
+            "name": "Thiru New V1.0 REST activity",
+            "description": "This is a new Json V1 format Rest activity"
+        }
+    },
+    "arguments": {
+        "execute": {
+	        "inArguments": [],
+            "outArguments": [],
+            "url": "https://posttestserver.com/post.php?dir=et_xjson_jexe",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+	    "format": "json",
+            "useJwt": false,
+            "timeout": 10000
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "Rest_New_10",
+        "save": {
+            "url": "https://posttestserver.com/post.php?dir=et_xjson_jsave",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+	    "verb": "POST",
+            "useJwt": false
+        },
+        "publish": {
+            "url": "https://posttestserver.com/post.php?dir=et_xjson_jPub",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+	    "useJwt": false
+        },
+	"unpublish": {
+            "url": "https://posttestserver.com/post.php?dir=et_xjson_unpub",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+	    "useJwt": false
+        },
+        "validate": {
+            "url": "https://posttestserver.com/post.php?dir=et_xjson_jval",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+	    "useJwt": false
+        }
+    },
+    "edit": {
+        "uri": "",
+        "height": 200,
+        "width": 300
+    }
+}

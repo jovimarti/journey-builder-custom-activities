@@ -1,0 +1,74 @@
+{
+    "workflowApiVersion": "1.0",
+    "metaData": {
+        "icon": "images/split.gif",
+        "iconSmall": "images/splitSmall.gif",
+        "category": "flow",
+        "version": "1.0"
+    },
+    "type": "RestDecision",
+    "lang": {
+        "en-US": {
+            "name": "Custom Split (DB)",
+            "description": "An app extension with multiple outcomes.",
+            "buy": "Buy",
+            "sell": "Sell",
+            "hold": "Hold"
+        },
+		"qaT": {
+            "name": "[[Custom Split (DB)]]",
+            "description": "An app extension with multiple outcomes.",
+            "buy": "[[Buy]]",
+            "sell": "[[Sell]]",
+            "hold": "[[Hold]]"
+		}
+    },
+    "arguments": {
+        "execute": {
+            "inArguments": [],
+            "outArguments": [],
+            "uri": "https://jbunn-rest-decision-ruby.herokuapp.com/execute",
+            "verb": "POST",
+            "body": "",
+            "header": "",
+            "format": "json",
+            "useJwt": false,
+            "timeout": 10000
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "custom-split",
+        "save": {
+            "uri": "https://jbunn-rest-decision-ruby.herokuapp.com/save",
+            "body": "",
+            "verb": "POST",
+            "useJwt": false
+        },
+        "publish": {
+            "uri": "https://jbunn-rest-decision-ruby.herokuapp.com/publish",
+            "verb": "POST",
+            "body": "",
+            "useJwt": false
+        },
+        "validate": {
+            "uri": "https://jbunn-rest-decision-ruby.herokuapp.com/validate",
+            "verb": "POST",
+            "body": "",
+            "useJwt": false
+        }
+    },
+    "outcomes": [
+        { "arguments": { "branchResult": "buy" } },
+        { "arguments": { "branchResult": "hold" } },
+        { "arguments": { "branchResult": "sell" } }
+    ],
+    "outcomeLabelLanguageMap": {
+        "buy": "buy"
+        , "sell": "sell"
+        , "hold": "hold"
+    },
+    "edit": {
+        "height": 200,
+        "width": 300
+    }
+}

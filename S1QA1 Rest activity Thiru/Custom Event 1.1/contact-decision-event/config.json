@@ -1,0 +1,83 @@
+{
+    "workflowApiVersion": "1.1",
+    "metaData": {
+        "icon": "images/icon.png"
+    },
+    "type": "RESTEvent",
+    "lang":{
+        "en-US": {
+            "name": "Custom Event Thiru s1qa1 API v1.1",
+            "description": "A more complete ContactDecision custom trigger example using the workflow API v1.1.",
+            "selectCountry": "Select Country",
+            "enterFirstName": "Enter First Name",
+            "enterLastName": "Enter Last Name",
+            "enterFavoriteFood": "Enter Favorite Food",
+            "countryCodeLabel": "Country Code",
+            "firstNameLabel": "First Name",
+            "lastNameLabel": "Last Name",
+            "favoriteFoodLabel": "Favorite Food",
+			"typeName": "Thirus Tests"
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "Custom_event_1",
+        "save": {
+            "url": "https://posttestserver.com/post.php?dir=et_jsoncevent11_jsave",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "verb": "POST",
+            "useJwt": false
+        },
+        "publish": {
+             "url": "https://posttestserver.com/post.php?dir=et_jsoncevent11_jPub",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "useJwt": false
+        },
+            "unpublish": {
+            "url": "https://posttestserver.com/post.php?dir=et_jsoncevent11_unpub",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "useJwt": false
+        },
+        "validate": {
+            "url": "https://posttestserver.com/post.php?dir=et_jsoncevent11_jval",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "useJwt": false
+        }
+    },
+    "filterExpressionEnabled": true,
+    "wizardSteps": [
+        { "key": "selectCountry", "label": "selectCountry" },
+        { "key": "enterFirstName", "label": "enterFirstName" },
+        { "key": "enterLastName", "label": "enterLastName" },
+        { "key": "enterFavoriteFood", "label": "enterFavoriteFood", "active": false }
+    ],
+    "userInterfaces": {
+        "configModal": {
+            "url": "index.html"
+        },
+        "summary": [
+            {
+                "valuePath": "arguments.countryCode",
+                "label": "countryCodeLabel"
+            },
+            {
+                "valuePath": "arguments.firstName",
+                "label": "firstNameLabel"
+            },
+            {
+                "valuePath": "arguments.lastName",
+                "label": "lastNameLabel"
+            },
+            {
+                "valuePath": "arguments.favoriteFood",
+                "label": "favoriteFoodLabel"
+            }
+        ]
+    }
+}

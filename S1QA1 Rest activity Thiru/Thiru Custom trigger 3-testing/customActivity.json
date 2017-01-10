@@ -1,0 +1,35 @@
+define([
+    'jquery',
+    'postmonger',
+    'fuelux/all' ],
+        function($, Postmonger /* FuelAll */ ){
+            'use strict';
+            var connection = new Postmonger.Session(); var options;
+            var uiPayload;
+            var etPayload;
+            $(window).ready(function() {
+                connection.trigger('ready');
+            });
+
+            connection.on('updateStep', function(step) { 
+                if (step >= 1 && step <= 3) {
+                    $('.step').hide(); 
+                    $('#step'+step).show(); 
+                    connection.trigger('updateStep', step);
+                } else if (step > 3) {
+                    options = { // any values that need to be repopulated in the custom trigger UI should be placed here
+                        option1: $('#select1').find('option:selected').attr('value'), 
+                        option2: $('#select2').find('option:selected').attr('value'), 
+                        option3: $('#select3').find('option:selected').attr('value')
+                };
+                uiPayload = {
+                    options: options,
+                    description: 'option 1: ' + options.option1 + ', option 2: ' + options.option2 + ', option 3: ' + options.option3
+                };
+                etPayload = {
+                    filter: '' // some XML
+                };
+                connection.trigger('save', uiPayload, etPayload); 
+            });
+        }); 
+    });

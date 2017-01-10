@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Custom IXN Activity Test</title>
+
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/require.js"></script>
+    <script type="text/javascript">
+        (function() {
+            var config = {
+                baseUrl: ''
+            };
+
+            var dependencies = [
+                'customActivity'
+            ];
+
+            require(config, dependencies);
+        })();
+    </script>
+
+    <!--Styles-->
+    <style type="text/css">
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        .delete {
+            cursor: pointer;
+        }
+        #errors {
+            display: none;
+            color: red;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="errors">This key is invalid.  Ensure that it is not already in use.</div>
+    <input id="add-branch" type="button" value="Add Branch"/><input id="branch-criteria" type="input" value=""/>
+    <div id="branch-list"></div>
+</body>
+</html>

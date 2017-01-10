@@ -1,0 +1,98 @@
+{
+	
+	"key":"Custom_trigger",
+        "icon": "images/icon.png",
+	"type": "ContactEvent",
+	"lang":{
+		"en-US":{
+			"name":"Thiru Custom Trigger 3-testing",
+			"description":"This is an external trigger that will be loaded through an iframe new test trigger",
+			"typeName": "Thiru's Tests"
+		}
+	},
+	"version":"1",
+	"dataExtension": {
+		"fields":[
+		{
+			"name":"countryCode",
+			"dataType":"text",
+			"maxLength":"50",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		 {
+			"name":"firstName",
+			"dataType":"text",
+			"maxLength":"100",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		{
+			"name":"lastName",
+			"dataType":"text",
+			"maxLength":"100",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		 {
+			"name":"My Integer",
+			"dataType":"number",
+			"maxLength":"",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		 {
+			"name":"My Date",
+			"dataType":"date",
+			"maxLength":"",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		 {
+			"name":"My Bool",
+			"dataType":"boolean",
+			"maxLength":"",
+			"isNullable":false,
+			"defaultValue":"true"
+		 },
+		 {
+			"name":"My Email",
+			"dataType":"email",
+			"maxLength":"",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		 {
+			"name":"My Phone",
+			"dataType":"phone",
+			"maxLength":"",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		 {
+			"name":"My Decimal",
+			"dataType":"decimal",
+			"maxLength":"18,0",
+			"isNullable":false,
+			"defaultValue":""
+		 },
+		 {
+			"name":"My Locale",
+			"dataType":"locale",
+			"maxLength":"",
+			"isNullable":false,
+			"defaultValue":""
+		 }
+	  ],
+	"sendableCustomObjectField": "My Email",
+	"sendableSubscriberField": "_SubscriberKey"
+	},
+	"edit":{
+		"uri":"trigger.html",
+		"maxHeight":500,
+		"maxWidth":800,
+		"minHeight":300,
+		"minWidth":500,
+		"steps":3
+	}
+}

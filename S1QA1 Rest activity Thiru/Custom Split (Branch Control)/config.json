@@ -1,0 +1,57 @@
+{
+    "workflowApiVersion": "1.0",
+    "metaData": {
+        "icon": "images/split.gif",
+        "iconSmall": "images/splitSmall.gif",
+        "category": "flow",
+        "version": "1.0"
+    },
+    "type": "CUSTOM_SPLIT",
+    "lang": {
+        "en-US": {
+            "name": "Custom Split",
+            "description": "An app extension with multiple outcomes.",
+            "buy": "Buy",
+            "sell": "Sell",
+            "cart": "Cart",
+            "return": "Return"
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "custom-split-with-branch-control"
+    },
+    "outcomes": [
+        {
+            "arguments": {
+                "branchResult": "buy_item",
+                "some argument": "passed from config.json for buy_item"
+            }
+        },
+        {
+            "arguments": {
+                "branchResult": "sell_item",
+                "some argument": "passed from config.json for sell_item"
+            }
+        },
+        {
+            "arguments": {
+                "branchResult": "cart_item",
+                "some argument": "passed from config.json for cart_item"
+            },
+            "metaData": {
+                "label": "MyCustomLabel"
+            }
+        }
+    ],
+    "outcomeLabelLanguageMap": {
+        "buy_item": "buy"
+        , "sell_item": "sell"
+        , "cart_item": "cart"
+        , "return_item": "return"
+    },
+    "edit": {
+        "uri": "",
+        "height": 200,
+        "width": 300
+    }
+}

@@ -18,7 +18,7 @@
         "execute": {
             "inArguments": [],
             "outArguments": [],
-            "url": "URI/for/your/activity/execute",
+            "url": "https://posttestserver.com/post.php?dir=jb_testBed_v1.1_rest_activity_execute",
             "verb": "POST",
             "body": "",
             "header": "",
@@ -30,19 +30,19 @@
     "configurationArguments": {
         "applicationExtensionKey": "Rest11",
         "save": {
-            "url": "URI/for/your/activity/save",
+            "url": "https://posttestserver.com/post.php?dir=jb_testBed_v1.1_rest_activity_save",
             "body": "",
             "verb": "POST",
             "useJwt": false
         },
         "publish": {
-            "url": "URI/for/your/activity/publish",
+            "url": "https://posttestserver.com/post.php?dir=jb_testBed_v1.1_rest_activity_publish",
             "verb": "POST",
             "body": "",
             "useJwt": false
         },
         "validate": {
-            "url": "URI/for/your/activity/validate",
+            "url": "https://posttestserver.com/post.php?dir=jb_testBed_v1.1_rest_activity_execute",
             "verb": "POST",
             "body": "",
             "useJwt": false

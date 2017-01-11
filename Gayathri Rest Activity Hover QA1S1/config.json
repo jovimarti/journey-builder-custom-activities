@@ -28,7 +28,7 @@
         }
     },
     "configurationArguments": {
-        "applicationExtensionKey": "Rest11",
+        "applicationExtensionKey": "HoverActivity",
         "save": {
             "url": "https://posttestserver.com/post.php?dir=jb_testBed_v1.1_rest_activity_save",
             "body": "",

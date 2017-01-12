@@ -1,0 +1,184 @@
+%%[
+	/* START: THESE FIELDS WILL COME FROM THE EVENT RECORD ITSELF */
+	VAR @ETSurrogateID, @EventInstanceID, @AccountNumber, @AccountBalance,
+		@Currency, @Proc_Date_Time, @TransactionAmount, @Transaction_Type,
+		@Eng_Desc_1,@Eng_Desc_2,@Eng_Desc_3,@Fr_Desc_1,@Fr_Desc_2,@Fr_Desc_3
+	
+	SET @ETSurrogateID =  {{Contact.Attribute.Code_Activity_Input.ETSurrogateID}}
+	SET @EventInstanceID = {{Contact.Attribute.Code_Activity_Input.EventInstanceID}} 
+	SET @AccountNumber = {{Contact.Attribute.Code_Activity_Input.Account_Number}}	
+	SET @AccountBalance = {{Contact.Attribute.Code_Activity_Input.Account_Balance}}
+	SET @Currency = {{Contact.Attribute.Code_Activity_Input.Currency}}
+	SET @Proc_Date_Time = {{Contact.Attribute.Code_Activity_Input.Proc_Date_Time}}
+	SET @TransactionAmount =  {{Contact.Attribute.Code_Activity_Input.Transaction_Amt}}
+	SET @Transaction_Type =  {{Contact.Attribute.Code_Activity_Input.Transaction_Type}}
+
+	SET @Eng_Desc_1 =  {{Contact.Attribute.Code_Activity_Input.Eng_Desc_1}} 
+	SET @Eng_Desc_2 =  {{Contact.Attribute.Code_Activity_Input.Eng_Desc_1}}  
+	SET @Eng_Desc_3 =  {{Contact.Attribute.Code_Activity_Input.Eng_Desc_1}} 
+
+	SET @Fr_Desc_1 =  {{Contact.Attribute.Code_Activity_Input.Fr_Desc_1}} 
+	SET @Fr_Desc_2 =  {{Contact.Attribute.Code_Activity_Input.Fr_Desc_2}}
+	SET @Fr_Desc_3 =  {{Contact.Attribute.Code_Activity_Input.Fr_Desc_3}}
+
+
+	/* END: THESE FIELDS WILL COME FROM THE EVENT RECORD ITSELF */
+
+	/* START: CONSTANTS DEFINING THE TRIGGERED SENDS TO CALL */
+	VAR @COLTTransactionAlertTSD
+	SET @COLTTransactionAlertTSD = "RBCX_Low_Balance_Alert"
+
+
+	/* END: CONSTANTS DEFINING THE TRIGGERED SENDS TO CALL */
+
+
+	IF NOT EMPTY(@ETSurrogateID) THEN  
+		/* look up the alerts for this account */
+		VAR @AccountAlerts, @AccountAlertPreferences
+		SET @AccountAlerts = LookupRows("Banking_Alert_Preferences_Accounts","ET_Surrogate_ID",@ETSurrogateID,"Account_Number",@AccountNumber)
+                	
+		/*   for each alert setup, grab what is setup Banking_Alert_Preferences */
+		VAR @AlertCount, @currAlertPos
+		SET @AlertCount = ROWCOUNT(@AccountAlerts)
+		IF @AlertCount > 0 THEN
+			VAR @AlertCenterProfile, @Email_Address, @Mobile_Number, @Language, @User_Name, @First_Name, @Last_Name, @LoopCnt
+			SET @AlertCenterProfile = LookupRows("Alert_Center_Profile","ET_Surrogate_ID",@ETSurrogateID)
+			SET @LoopCnt = 0
+
+			IF ROWCOUNT(@AlertCenterProfile) > 0 THEN
+				SET @emailToSendTo = Field(Row(@AlertCenterProfile,1),"Email_Address")
+				SET @Mobile_Number = Field(Row(@AlertCenterProfile,1),"Mobile_Number")
+				SET @Language = Field(Row(@AlertCenterProfile,1),"Language")
+				SET @User_Name = Field(Row(@AlertCenterProfile,1),"User_Name")
+				SET @First_Name = Field(Row(@AlertCenterProfile,1),"First_Name")
+				SET @Last_Name = Field(Row(@AlertCenterProfile,1),"Last_Name")
+			ENDIF
+		
+			
+			FOR @currAlertPos = 1 to @AlertCount DO
+				VAR @SetupAlertNickname, @PreferenceCount, @currPrefPos, 
+				SET @SetupAlertNickname = Field(Row(@AccountAlerts,@currAlertPos),"Alert_Nickname")
+				SET @Account_Nickname = Field(Row(@AccountAlerts,@currAlertPos),"Account_Nickname") 
+				SET @AccountAlertPreferences = LookupRows("Banking_Alert_Preferences","ET_Surrogate_ID",@ETSurrogateID,"Alert_Nickname",@SetupAlertNickname)
+				
+				SET @PreferenceCount = ROWCOUNT(@AccountAlertPreferences)
+				
+				IF @PreferenceCount > 0 THEN
+					FOR @currPrefPos = 1 to @PreferenceCount DO
+						VAR @OptedIn, @Email, @SMS, @Threshold, @Qualified, @Alert_Type_Code, @TranID					
+						SET @Threshold = Field(Row(@AccountAlertPreferences,@currPrefPos),"Alert_Threshold")
+						SET @OptedIn = Field(Row(@AccountAlertPreferences,@currPrefPos),"Delivery_Option_Inbox")
+						SET @Email = Field(Row(@AccountAlertPreferences,@currPrefPos),"Delivery_Option_Email")
+						SET @SMS = Field(Row(@AccountAlertPreferences,@currPrefPos),"Delivery_Option_SMS")
+						SET @Alert_Type_Code = Field(Row(@AccountAlertPreferences,@currPrefPos),"Alert_Type_Code")
+						SET @Qualified = "False"
+						
+						IF (@LoopCnt == 0) THEN
+							SET @TranID = @EventInstanceID
+						ELSE
+							SET @TranID = CONCAT(@EventInstanceID, "-", @LoopCnt)
+						ENDIF
+
+						/*  Banking Credit Transactions */
+						IF (@Threshold <= @TransactionAmount AND @Alert_Type_Code == "302" AND (@Transaction_Type == "CR" OR @Transaction_Type == "VC")) THEN
+							SET @Qualified = "True" 	
+						ENDIF
+						/* Banking Debit Transactions */
+						IF (@Threshold <= @TransactionAmount AND @Alert_Type_Code == "303" AND (@Transaction_Type == "DR" OR @Transaction_Type == "VD" OR @Transaction_Type == "CD")) THEN
+							SET @Qualified = "True" 	
+						ENDIF
+						/* Banking Checking Transactions */
+						IF @Threshold <= @TransactionAmount AND @Alert_Type_Code == "304" AND @Transaction_Type == "CD" THEN
+							SET @Qualified = "True" 	
+						ENDIF
+						
+						/* FIRST STEP IS TO CREATE ALERT_INBOX RECORD */
+						IF @Qualified == "True" AND @OptedIn == "True" THEN
+							SET @LoopCnt = ADD(@LoopCnt, 1)
+							VAR @Transaction_field_2, @Transaction_field_3, @Transaction_field_4, 
+								@Transaction_field_5, @Transaction_field_6, @Transaction_field_7, @Transaction_field_8, 
+								@Transaction_field_9, @Transaction_field_10, @Transaction_field_11, @Transaction_field_12
+
+							IF (@Transaction_Type == "CR" OR @Transaction_Type == "DR" OR @Transaction_Type == "VC" OR @Transaction_Type == "VD" OR @Transaction_Type == "CD") THEN
+								SET @Transaction_field_2 = @Transaction_Type
+								SET @Transaction_field_3 = @AccountNumber
+								SET @Transaction_field_4 = @Account_Nickname
+								SET @Transaction_field_5 =@TransactionAmount
+								SET @Transaction_field_6 = @Eng_Desc_1
+								SET @Transaction_field_7 = @Eng_Desc_2
+								SET @Transaction_field_8 = @Eng_Desc_3
+								SET @Transaction_field_9 = @Fr_Desc_1
+								SET @Transaction_field_10 = @Fr_Desc_2
+								SET @Transaction_field_11 = @Fr_Desc_3
+								SET @Transaction_field_12 = @Currency
+							ENDIF
+
+							InsertData("Alert_Inbox",
+								"ET_Surrogate_ID",@ETSurrogateID,
+								"ET_Transaction_ID",@TranID,
+								"Account_Number",@AccountNumber,
+								"Email_Address",@emailToSendTo,
+								"Mobile_Number",@Mobile_Number,
+								"Language",@Language,
+								"Alert_Type_Code",@Alert_Type_Code,
+								"Email_Sent",@Email,
+								"SMS_Sent",@SMS,
+								"First_Name",@First_Name,
+								"Last_Name", @Last_Name,
+								"Transaction_field_1",@Proc_Date_Time, 
+								"Transaction_field_2",@Transaction_field_2, 
+								"Transaction_field_3",@Transaction_field_3, 
+								"Transaction_field_4",@Transaction_field_4, 
+								"Transaction_field_5",@Transaction_field_5, 
+								"Transaction_field_6",@Transaction_field_6, 
+								"Transaction_field_7",@Transaction_field_7, 
+								"Transaction_field_8",@Transaction_field_8, 
+								"Transaction_field_9",@Transaction_field_9, 
+								"Transaction_field_10",@Transaction_field_10, 
+								"Transaction_field_11",@Transaction_field_11,
+								"Transaction_field_12",@Transaction_field_12
+								)
+							
+							IF @Email == "True" AND isEmailAddress(@emailToSendTo) == True  THEN
+							]%%
+								Attempting Email Triggered Send Call
+							%%[
+								/*  Call Email Triggered Send For COLT transactions */
+								var @ts, @tsDef, @ts_sub, @ts_statusMsg, @errorCode								
+
+   								SET @ts = CreateObject("TriggeredSend")
+   								SET @tsDef = CreateObject("TriggeredSendDefinition")
+
+   								SetObjectProperty(@tsDef, "CustomerKey", "RBCX_Low_Balance_Alert")
+   								SetObjectProperty(@ts, "TriggeredSendDefinition", @tsDef)  
+
+   								SET @ts_sub = CreateObject("Subscriber")
+   								SetObjectProperty(@ts_sub, "EmailAddress", @emailToSendTo)
+  								SetObjectProperty(@ts_sub, "SubscriberKey", @ETSurrogateID)
+   								AddObjectArrayItem(@ts, "Subscribers", @ts_sub)
+	
+								/* Define attribute values */
+								SET @ts_attr = CreateObject("Attribute")
+								SetObjectProperty(@ts_attr, "Name", "EventInstanceId")
+								SetObjectProperty(@ts_attr, "Value", @TranID)
+								AddObjectArrayItem(@ts, "Attributes", @ts_attr)
+
+
+   								SET @ts_statusCode = InvokeCreate(@ts, @ts_statusMsg, @errorCode)  
+
+   								IF @ts_statusCode != "OK" THEN
+       									RaiseError(@ts_statusMsg, 0, @ts_statusCode, @errorCode)
+   								ENDIF
+							ENDIF
+							IF @SMS == "True" THEN
+							]%%
+								SMS TRUE 
+							%%[
+							ENDIF
+						ENDIF
+					NEXT @currPrefPos
+				ENDIF
+			NEXT @currAlertPos 
+		ENDIF
+	ENDIF
+]%% 

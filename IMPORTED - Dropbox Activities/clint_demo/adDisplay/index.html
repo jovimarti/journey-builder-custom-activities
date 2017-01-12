@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Custom IXN Activity Test</title>
+
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/require.js"></script>
+    <script type="text/javascript">
+        (function() {
+            var config = {
+                baseUrl: ''
+            };
+
+            var dependencies = [
+                'customActivity'
+            ];
+
+            require(config, dependencies);
+        })();
+    </script>
+
+    <!--Styles-->
+    <style type="text/css">
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+
+</head>
+<body>
+<div>
+
+    Select your ad: 
+	<select id="select1">
+		<option value="someMessage">Some Ad</option>
+		<option value="anotherMessage">Another Ad</option>
+		<option value="thirdMessage">Third Ad</option>
+		<option value="unknownMessage">Unknown Ad</option>
+	</select>
+</div>
+</body>
+</html>

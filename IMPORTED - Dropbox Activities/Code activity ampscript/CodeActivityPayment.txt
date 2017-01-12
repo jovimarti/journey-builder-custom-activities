@@ -1,0 +1,124 @@
+%%[
+	/* START: THESE FIELDS WILL COME FROM THE EVENT RECORD ITSELF */
+	VAR @ETSurrogateID, @EventInstanceID, @Event_Type,
+		@Proc_Date_Time, @Transaction_Type, @Eng_Desc_1, @Fr_Desc_1
+	
+	SET @ETSurrogateID = {{Contact.Attribute.Code_Activity_Input_Payment.ETSurrogateID3}}
+	SET @EventInstanceID = {{Contact.Attribute.Code_Activity_Input_Payment.EventInstanceID3}}  
+	SET @Proc_Date_Time = {{Contact.Attribute.Code_Activity_Input_Payment.Proc_Date_Time3}}
+	SET @Transaction_Type =  {{Contact.Attribute.Code_Activity_Input_Payment.Transaction_Type3}} 
+	SET @Event_Type = {{Contact.Attribute.Code_Activity_Input_Payment.Event_Type3}}
+	SET @Eng_Desc_1 =  {{Contact.Attribute.Code_Activity_Input_Payment.Eng_Desc_1_3}}
+	SET @Fr_Desc_1 =  {{Contact.Attribute.Code_Activity_Input_Payment.Fr_Desc_1_3}} 
+
+	/* END: THESE FIELDS WILL COME FROM THE EVENT RECORD ITSELF */
+
+	/* START: CONSTANTS DEFINING THE TRIGGERED SENDS TO CALL */
+
+	/* END: CONSTANTS DEFINING THE TRIGGERED SENDS TO CALL */
+
+
+	IF NOT EMPTY(@ETSurrogateID) THEN  
+		VAR @AlertCenterProfile, @emailToSendTo, @Mobile_Number, @Language, @User_Name, @First_Name, @Last_Name
+		
+		SET @AlertCenterProfile = LookupRows("Alert_Center_Profile","ET_Surrogate_ID",@ETSurrogateID)
+
+		IF ROWCOUNT(@AlertCenterProfile) > 0 THEN
+			SET @emailToSendTo = Field(Row(@AlertCenterProfile,1),"Email_Address")
+			SET @Mobile_Number = Field(Row(@AlertCenterProfile,1),"Mobile_Number")
+			SET @Language = Field(Row(@AlertCenterProfile,1),"Language")
+			SET @User_Name = Field(Row(@AlertCenterProfile,1),"User_Name")
+			SET @First_Name = Field(Row(@AlertCenterProfile,1),"First_Name")
+			SET @Last_Name = Field(Row(@AlertCenterProfile,1),"Last_Name")
+
+			VAR @Email, @SMS, @Payment_Approval_Email, @Payment_Approval_SMS, @Payment_Reject_Email, 
+				@Payment_Reject_SMS, @PaymentAlertPreferences				
+			SET @PaymentAlertPreferences = LookupRows("Payment_Alert_Preferences","ET_Surrogate_ID",@ETSurrogateID)
+			
+			IF ROWCOUNT(@PaymentAlertPreferences) > 0 THEN
+				SET @Payment_Approval_Email = Field(Row(@PaymentAlertPreferences,1),"Payment_Approval_Email")
+				SET @Payment_Approval_SMS = Field(Row(@PaymentAlertPreferences,1),"Payment_Approval_SMS")
+				SET @Payment_Reject_Email = Field(Row(@PaymentAlertPreferences,1),"Payment_Reject_Email")
+				SET @Payment_Reject_SMS = Field(Row(@PaymentAlertPreferences,1),"Payment_Reject_SMS")
+
+				SET @Email = "False"
+				IF isEmailAddress(@emailToSendTo) THEN
+					IF (@Transaction_Type == "203" AND @Payment_Approval_Email == "True") THEN
+						SET @Email = "True"
+					ENDIF
+					IF (@Transaction_Type == "204" AND @Payment_Reject_Email == "True") THEN
+						SET @Email = "True"
+					ENDIF
+				ENDIF
+				IF (@Email == "False") THEN
+					SET @emailToSendTo = ""
+				ENDIF
+
+				SET @SMS = "False"
+				IF NOT EMPTY(@Mobile_Number) THEN
+					IF (@Transaction_Type == "203" AND @Payment_Approval_SMS == "True") THEN
+						SET @SMS = "True"
+					ENDIF
+					IF (@Transaction_Type == "204" AND @Payment_Reject_SMS == "True") THEN
+						SET @SMS = "True"
+					ENDIF
+				ENDIF
+				IF (@SMS == "False") THEN
+					SET @Mobile_Number = ""
+				ENDIF
+						
+				/* FIRST STEP IS TO CREATE ALERT_INBOX RECORD */
+				InsertData("Alert_Inbox",
+					"ET_Surrogate_ID",@ETSurrogateID,
+					"ET_Transaction_ID",@EventInstanceID,
+					"Account_Number",@AccountNumber,
+					"Email_Address",@emailToSendTo,
+					"Mobile_Number",@Mobile_Number,
+					"Language",@Language,
+					"Alert_Type_Code",@Transaction_Type,
+					"Email_Sent",@Email,
+					"SMS_Sent",@SMS,
+					"First_Name",@First_Name,
+					"Last_Name", @Last_Name,
+					"Transaction_field_1",@Proc_Date_Time, 
+					"Transaction_field_2",@Eng_Desc_1, 
+					"Transaction_field_3",@Fr_Desc_1
+				)
+						
+				IF @Email == "True" THEN
+			]%%
+			Attempting Email Triggered Send Call
+			%%[
+					/*  Call Email Triggered Send For Security Alerts */
+					var @ts, @tsDef, @ts_sub, @ts_statusMsg, @errorCode, @ts_statusCode								
+					SET @ts = CreateObject("TriggeredSend")
+  					SET @tsDef = CreateObject("TriggeredSendDefinition")
+	 				SetObjectProperty(@tsDef, "CustomerKey", "RBCX_Low_Balance_Alert")
+   					SetObjectProperty(@ts, "TriggeredSendDefinition", @tsDef)  
+
+	   				SET @ts_sub = CreateObject("Subscriber")
+   					SetObjectProperty(@ts_sub, "EmailAddress", @emailToSendTo)
+	  				SetObjectProperty(@ts_sub, "SubscriberKey", @ETSurrogateID)
+   					AddObjectArrayItem(@ts, "Subscribers", @ts_sub)
+		
+					/* Define attribute values */
+					SET @ts_attr = CreateObject("Attribute")
+					SetObjectProperty(@ts_attr, "Name", "EventInstanceId")
+					SetObjectProperty(@ts_attr, "Value", @EventInstanceID)
+					AddObjectArrayItem(@ts, "Attributes", @ts_attr)
+	
+	   				SET @ts_statusCode = InvokeCreate(@ts, @ts_statusMsg, @errorCode)  
+	
+   					IF @ts_statusCode != "OK" THEN
+       						RaiseError(@ts_statusMsg, 0, @ts_statusCode, @errorCode)
+   					ENDIF
+				ENDIF
+				IF @SMS == "True" THEN
+			]%%
+			SMS TRUE 
+			%%[
+				ENDIF
+			ENDIF /* ROWCOUNT(@PaymentAlertPreferences) */
+		ENDIF /* ROWCOUNT(@AlertCenterProfile) */
+	ENDIF /* NOT EMPTY(@ETSurrogateID) */
+]%% 

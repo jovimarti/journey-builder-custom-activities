@@ -1,0 +1,73 @@
+{
+    "workflowApiVersion": "1.1",
+    "metaData": {
+        "icon": "images/sms.png",
+        "iconSmall": "images/smsSmall.png",
+        "category": "message"
+    },
+    "type": "REST",
+    "lang": {
+        "en-US": {
+            "name": "Dhelms jb7513 test",
+            "description": ""
+        }
+    },
+    "arguments": {
+        "execute": {
+            "inArguments": [],
+            "outArguments": [],
+            "url": "https://posttestserver.com/post.php?dir=et_jsoncustom11_jexe",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "useJwt": true,
+            "customerKey": "dhelms-test-key-2",
+            "timeout": 10000
+             
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "dhelms-test-activity-take-3",
+        "save": {
+            "url": "https://posttestserver.com/post.php?dir=et_jsoncustom11_jsave",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "verb": "POST",
+            "useJwt": true
+        },
+        "publish": {
+             "url": "https://posttestserver.com/post.php?dir=et_jsoncustom11_jPub",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "useJwt": true
+        },
+            "unpublish": {
+            "url": "https://posttestserver.com/post.php?dir=et_jsoncustom11_unpub",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "useJwt": true
+        },
+        "validate": {
+            "url": "https://posttestserver.com/post.php?dir=et_jsoncustom11_jval",
+            "verb": "POST",
+            "body": "{\"Email\": \"%%emailAddr%%\", \"First Name\": \"%%FirstName%%\", \"Last Name\": \"%%LastName%%\"}",
+            "header": "",
+            "useJwt": true
+        }
+    },
+    "wizardSteps": [
+        { "label": "Step 1", "key": "step1" },
+        { "label": "Step 2", "key": "step2" },
+        { "label": "Step 3", "key": "step3" },
+        { "label": "Step 4", "key": "step4", "active": false }
+    ],
+    "userInterfaces": {
+        "configModal": {
+            "height": 200,
+            "width": 300,
+            "fullscreen": true
+        }
+    }
+}

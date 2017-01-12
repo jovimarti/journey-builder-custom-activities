@@ -1,0 +1,226 @@
+%%[
+	/* START: THESE FIELDS WILL COME FROM THE EVENT RECORD ITSELF */
+	VAR @ETSurrogateID, @EventInstanceID, 
+		@Proc_Date_Time, @Transaction_Type, @ADMIN_Surrogate_ID
+	
+	SET @ETSurrogateID =  {{Contact.Attribute.Code_Activity_Input_Security.ETSurrogateID2}}
+	SET @EventInstanceID = {{Contact.Attribute.Code_Activity_Input_Security.EventInstanceID2}}
+	SET @Transaction_Type =  {{Contact.Attribute.Code_Activity_Input_Security.Transaction_Type2}}
+	SET @Proc_Date_Time = {{Contact.Attribute.Code_Activity_Input_Security.Proc_Date_Time2}}
+	SET @ADMIN_Surrogate_ID =  {{Contact.Attribute.Code_Activity_Input_Security.ADMIN_Surrogate_ID2}}
+	/* END: THESE FIELDS WILL COME FROM THE EVENT RECORD ITSELF */
+
+	/* START: CONSTANTS DEFINING THE TRIGGERED SENDS TO CALL */
+
+	/* END: CONSTANTS DEFINING THE TRIGGERED SENDS TO CALL */
+
+
+	IF NOT EMPTY(@ETSurrogateID) THEN  
+		VAR @AlertCenterProfile, @emailToSendTo, @Mobile_Number, @Language, @User_Name, @First_Name, @Last_Name,
+			@Locked_Out_User_SMS, @Password_Change_SMS, @Email_Address_Change_SMS, @Login_ID_Change_SMS, @PVQ_Change_SMS
+		
+		SET @AlertCenterProfile = LookupRows("Alert_Center_Profile","ET_Surrogate_ID",@ETSurrogateID)
+
+		IF ROWCOUNT(@AlertCenterProfile) > 0 THEN
+			SET @emailToSendTo = Field(Row(@AlertCenterProfile,1),"Email_Address")
+			SET @Mobile_Number = Field(Row(@AlertCenterProfile,1),"Mobile_Number")
+			SET @Language = Field(Row(@AlertCenterProfile,1),"Language")
+			SET @User_Name = Field(Row(@AlertCenterProfile,1),"User_Name")
+			SET @First_Name = Field(Row(@AlertCenterProfile,1),"First_Name")
+			SET @Last_Name = Field(Row(@AlertCenterProfile,1),"Last_Name")
+			SET @Locked_Out_User_SMS = Field(Row(@AlertCenterProfile,1),"SA_Locked_Out_User_SMS")
+			SET @Password_Change_SMS = Field(Row(@AlertCenterProfile,1),"SA_Password_Change_SMS")
+			SET @Email_Address_Change_SMS = Field(Row(@AlertCenterProfile,1),"SA_Email_Address_Change_SMS")
+			SET @Login_ID_Change_SMS = Field(Row(@AlertCenterProfile,1),"SA_Login_ID_Change_SMS")
+			SET @PVQ_Change_SMS = Field(Row(@AlertCenterProfile,1),"SA_PVQ_Change_SMS")
+			VAR @Email, @SMS, @Threshold, @Qualified, @TranID					
+		
+			IF isEmailAddress(@emailToSendTo) THEN
+				SET @Email = "True"
+			ELSE 
+				SET @Email = "False"
+			ENDIF
+
+			SET @SMS = "False"
+			IF NOT EMPTY(@Mobile_Number) THEN
+				IF (@Transaction_Type == "101" AND @Locked_Out_User_SMS == "True") THEN
+					SET @SMS = "True"
+				ENDIF
+				IF (@Transaction_Type == "102" AND @Password_Change_SMS == "True") THEN
+					SET @SMS = "True"
+				ENDIF
+				IF (@Transaction_Type == "103" AND @Email_Address_Change_SMS == "True") THEN
+					SET @SMS = "True"
+				ENDIF
+				IF (@Transaction_Type == "104" AND @Login_ID_Change_SMS == "True") THEN
+					SET @SMS = "True"
+				ENDIF
+				IF (@Transaction_Type == "105" AND @PVQ_Change_SMS == "True") THEN
+					SET @SMS = "True"
+				ENDIF
+			ENDIF
+			IF (@SMS == "False") THEN
+				SET @Mobile_Number = ""
+			ENDIF
+						
+			/* FIRST STEP IS TO CREATE ALERT_INBOX RECORD */
+			VAR @Transaction_field_2, @Transaction_field_3, @Transaction_field_4, 
+				@Transaction_field_5, @Transaction_field_6, @Transaction_field_7, @Transaction_field_8, 
+				@Transaction_field_9, @Transaction_field_10, @Transaction_field_11, @Transaction_field_12
+		
+			InsertData("Alert_Inbox",
+				"ET_Surrogate_ID",@ETSurrogateID,
+				"ET_Transaction_ID",@EventInstanceID,
+				"Account_Number",@AccountNumber,
+				"Email_Address",@emailToSendTo,
+				"Mobile_Number",@Mobile_Number,
+				"Language",@Language,
+				"Alert_Type_Code",@Transaction_Type,
+				"Email_Sent",@Email,
+				"SMS_Sent",@SMS,
+				"First_Name",@First_Name,
+				"Last_Name", @Last_Name,
+				"Transaction_field_1",@Proc_Date_Time, 
+				"Transaction_field_2",@Transaction_field_2, 
+				"Transaction_field_3",@Transaction_field_3, 
+				"Transaction_field_4",@Transaction_field_4, 
+				"Transaction_field_5",@Transaction_field_5, 
+				"Transaction_field_6",@Transaction_field_6, 
+				"Transaction_field_7",@Transaction_field_7, 
+				"Transaction_field_8",@Transaction_field_8, 
+				"Transaction_field_9",@Transaction_field_9, 
+				"Transaction_field_10",@Transaction_field_10, 
+				"Transaction_field_11",@Transaction_field_11,
+				"Transaction_field_12",@Transaction_field_12
+			)
+						
+			IF @Email == "True" THEN
+			]%%
+				Attempting Email Triggered Send Call
+			%%[
+				/*  Call Email Triggered Send For Security Alerts */
+				var @ts, @tsDef, @ts_sub, @ts_statusMsg, @errorCode, @ts_statusCode								
+				SET @ts = CreateObject("TriggeredSend")
+  				SET @tsDef = CreateObject("TriggeredSendDefinition")
+ 				SetObjectProperty(@tsDef, "CustomerKey", "RBCX_Low_Balance_Alert")
+   				SetObjectProperty(@ts, "TriggeredSendDefinition", @tsDef)  
+
+   				SET @ts_sub = CreateObject("Subscriber")
+   				SetObjectProperty(@ts_sub, "EmailAddress", @emailToSendTo)
+  				SetObjectProperty(@ts_sub, "SubscriberKey", @ETSurrogateID)
+   				AddObjectArrayItem(@ts, "Subscribers", @ts_sub)
+	
+				/* Define attribute values */
+				SET @ts_attr = CreateObject("Attribute")
+				SetObjectProperty(@ts_attr, "Name", "EventInstanceId")
+				SetObjectProperty(@ts_attr, "Value", @EventInstanceID)
+				AddObjectArrayItem(@ts, "Attributes", @ts_attr)
+
+
+   				SET @ts_statusCode = InvokeCreate(@ts, @ts_statusMsg, @errorCode)  
+
+   				IF @ts_statusCode != "OK" THEN
+       					RaiseError(@ts_statusMsg, 0, @ts_statusCode, @errorCode)
+   				ENDIF
+			ENDIF
+			IF @SMS == "True" THEN
+			]%%
+				SMS TRUE 
+			%%[
+		ENDIF
+			
+		/* NOW LET'S PROCESS ADMIN ALERTS */
+		IF NOT EMPTY(@ADMIN_Surrogate_ID) THEN
+			VAR @AdminIds, @Admin_Transaction_Type
+			IF (@Transaction_Type == "101") THEN
+				SET @Admin_Transaction_Type = "401"
+			ENDIF
+			IF (@Transaction_Type == "102") THEN
+				SET @Admin_Transaction_Type = "402"
+			ENDIF
+			IF (@Transaction_Type == "103") THEN
+				SET @Admin_Transaction_Type = "403"
+			ENDIF
+			IF (@Transaction_Type == "104") THEN
+				SET @Admin_Transaction_Type = "404"
+			ENDIF
+			IF (@Transaction_Type == "105") THEN
+				SET @Admin_Transaction_Type = "405"
+			ENDIF
+
+			
+
+			SET @AdminIds = BuildRowsetFromString(@Admin_Surrogate_ID, ",")
+			
+			FOR @i = 1 to ROWCOUNT(@AdminIds) DO
+				VAR @AdminAlertCenterProfile, @AdminSurrogateID, @adminEmailToSendTo, @Admin_Mobile_Number, @Admin_Language,
+					@Admin_User_Name, @Admin_First_Name, @Admin_Last_Name, @AdministrativeAlertFlag, @AdminEventInstanceId 
+	
+				SET @AdminSurrogateID = Field(Row(@AdminIds, @i),1)
+				
+				/* DETERMINE IF THIS SURROGATE ID IS SUPPOSED TO GET ADMIN ALERTS AND HAS AN EMAIL ON FILE */		
+				SET @AdminAlertCenterProfile = LookupRows("Alert_Center_Profile","ET_Surrogate_ID",@AdminSurrogateID)
+				
+				IF ROWCOUNT(@AdminAlertCenterProfile) > 0 THEN
+					SET @adminEmailToSendTo = Field(Row(@AdminAlertCenterProfile,1),"Email_Address")
+					SET @Admin_Mobile_Number = Field(Row(@AdminAlertCenterProfile,1),"Mobile_Number")
+					SET @Admin_Language = Field(Row(@AdminAlertCenterProfile,1),"Language")
+					SET @Admin_User_Name = Field(Row(@AdminAlertCenterProfile,1),"User_Name")
+					SET @Admin_First_Name = Field(Row(@AdminAlertCenterProfile,1),"First_Name")
+					SET @Admin_Last_Name = Field(Row(@AdminAlertCenterProfile,1),"Last_Name")
+					SET @AdministrativeAlertFlag = Field(Row(@AdminAlertCenterProfile,1),"AdministrativeAlertFlag")
+					SET @AdminEventInstanceId = CONCAT("Admin-", @EventInstanceID, "-", @i)
+
+					IF isEmailAddress(@adminEmailToSendTo) THEN
+			
+							InsertData("Alert_Inbox",
+								"ET_Surrogate_ID",@AdminSurrogateID,
+								"ET_Transaction_ID",@AdminEventInstanceId,
+								"Account_Number",@AccountNumber,
+								"Email_Address",@adminEmailToSendTo,
+								"Mobile_Number",@Admin_Mobile_Number,
+								"Language",@Language,
+								"Alert_Type_Code",@Admin_Transaction_Type,
+								"Email_Sent","True",
+								"SMS_Sent","False",
+								"First_Name",@Admin_First_Name,
+								"Last_Name",@Admin_Last_Name,
+								"Transaction_field_1",@Proc_Date_Time, 
+								"Transaction_field_2",@First_Name, 
+								"Transaction_field_3",@Last_Name
+							)
+
+
+							/*  Call Email Triggered Send For Admin Alerts */
+							var @tsa, @tsDefa, @ts_suba, @ts_statusMsga, @errorCodea, @ts_statusCodea								
+							SET @tsa = CreateObject("TriggeredSend")
+  							SET @tsDefa = CreateObject("TriggeredSendDefinition")
+ 							SetObjectProperty(@tsDefa, "CustomerKey", "RBCX_Low_Balance_Alert")
+   							SetObjectProperty(@tsa, "TriggeredSendDefinition", @tsDefa)  
+
+   							SET @ts_suba = CreateObject("Subscriber")
+   							SetObjectProperty(@ts_suba, "EmailAddress", @adminEmailToSendTo)
+  							SetObjectProperty(@ts_suba, "SubscriberKey",@AdminSurrogateID)
+   							AddObjectArrayItem(@tsa, "Subscribers", @ts_suba)
+	
+							/* Define attribute values */
+							SET @ts_attra = CreateObject("Attribute")
+							SetObjectProperty(@ts_attra, "Name", "EventInstanceId")
+							SetObjectProperty(@ts_attra, "Value", @AdminEventInstanceId)
+							AddObjectArrayItem(@tsa, "Attributes", @ts_attra)
+			]%%
+				Attempting Admin Email Triggered Send Call
+			%%[
+   							SET @ts_statusCodea = InvokeCreate(@tsa, @ts_statusMsga, @errorCodea)  
+
+   							IF @ts_statusCodea != "OK" THEN
+       								RaiseError(@ts_statusMsga, 0, @ts_statusCodea, @errorCodea)
+   							ENDIF
+						ENDIF
+					ENDIF
+				NEXT @i
+			ENDIF
+		ENDIF			 
+
+	ENDIF /* NOT EMPTY(@ETSurrogateID) */
+]%% 

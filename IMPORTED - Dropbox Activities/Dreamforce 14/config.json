@@ -1,0 +1,35 @@
+{
+    "workflowApiVersion": "1.0",
+    "metaData": {
+        "icon": "images/dreamforce.png",
+        "iconSmall": "images/dreamforce.png",
+        "category": "message",
+        "version": "1.0"
+    },
+    "type": "Rest",
+    "lang": {
+        "en-US": {
+            "name": "DF14 Registration",
+            "description": "A Dreamforce 14 custom activity for Journey Builder."
+        }
+    },
+    "arguments": {
+        "execute": {
+            "outArguments": [],
+            "url": "https://posttestserver.com/post.php?dir=et_testjson_jexe",
+            "format": "json",
+            "useJwt": false,
+            "inArguments": {
+                "deviceEventPayload": "{{Event.CONTACT-EVENT-1a6c325c-a03a-da04-e430-02f96ef91c2d.deviceEventPayload}}"
+            }
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "df14jbc"
+    },
+    "edit": {
+        "uri": "",
+        "height": 200,
+        "width": 300
+    }
+}

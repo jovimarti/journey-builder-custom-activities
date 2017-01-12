@@ -1,0 +1,48 @@
+{
+    "workflowApiVersion": "1.1",
+    "metaData": {
+        "icon": "images/icon.png",
+        "iconSmall": "images/iconSmall.png",
+        "category": ""
+    },
+    "type": "REST",
+    "useSso": true,
+    "lang": {
+        "en-US": {
+            "name": "SSO Activity",
+            "description": ""
+        }
+    },
+    "arguments": {
+        "execute": {
+            "inArguments": [],
+            "outArguments": [],
+            "url": "https://posttestserver.com/post.php?dir=et_SSOgmjsoncustom11_jexe"
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "NewSSOActivity",
+        "save": {
+            "url": "https://posttestserver.com/post.php?dir=et_SSOgmjsoncustom11_jsave"
+        },
+        "publish": {
+            "url": "https://posttestserver.com/post.php?dir=et_SSOgmjsoncustom11_jpub"
+        },
+        "validate": {
+            "uri": "https://posttestserver.com/post.php?dir=et_SSOgmjsoncustom11_jvalidate"
+        }
+    },
+    "wizardSteps": [
+        { "label": "Step 1", "key": "step1" },
+        { "label": "Step 2", "key": "step2" },
+        { "label": "Step 3", "key": "step3" },
+        { "label": "Step 4", "key": "step4", "active": false }
+    ],
+    "userInterfaces": {
+        "configModal": {
+            "height": 400,
+            "width": 700,
+			"url": "https://dl.dropboxusercontent.com/u/196037085/Gayathri%20Custom%20Activity/activity-using-sso/public/index.html"
+        }
+    }
+}

@@ -1,0 +1,63 @@
+{
+    "workflowApiVersion": "1.1",
+    "metaData": {
+        "icon": "images/sms.png",
+        "iconSmall": "images/smsSmall.png",
+        "category": "message"
+    },
+    "type": "REST",
+    "lang": {
+        "en-US": {
+            "name": "Gayathri Dropbox REST Activity (Workflow API v1.1)",
+            "description": ""
+        }
+    },
+    "arguments": {
+        "execute": {
+            "inArguments": [],
+            "outArguments": [],
+            "url": "https: //posttestserver.com/post.php?dir=et_gmjsoncustom11_jexe"
+        }
+    },
+    "configurationArguments": {
+        "applicationExtensionKey": "RestActivityv1.1",
+        "save": {
+            "url": "https: //posttestserver.com/post.php?dir=et_gmjsoncustom11_jsave"
+        },
+        "publish": {
+            "url": "https: //posttestserver.com/post.php?dir=et_gmjsoncustom11_jpub"
+        },
+        "validate": {
+            "url": "https: //posttestserver.com/post.php?dir=et_gmjsoncustom11_jvalidate"
+        },
+        "unpublish": {
+            "url": "https: //posttestserver.com/post.php?dir=et_gmjsoncustom11_junpublish"
+        }
+    },
+    "wizardSteps": [
+        {
+            "label": "Step1",
+            "key": "step1"
+        },
+        {
+            "label": "Step2",
+            "key": "step2"
+        },
+        {
+            "label": "Step3",
+            "key": "step3"
+        },
+        {
+            "label": "Step4",
+            "key": "step4",
+            "active": false
+        }
+    ],
+    "userInterfaces": {
+        "configModal": {
+            "height": 200,
+            "width": 300,
+            "fullscreen": true
+        }
+    }
+}

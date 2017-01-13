@@ -11,7 +11,7 @@
         "en-US": {
             "name": "Custom Activity (with Running Hover View)",
             "description": "A REST activity with a custom view for running mode.",
-            "runningHoverButtonLabel": "View or Update Activity"
+            "runningHoverButtonLabel": "Update Activity" 
         }
     },
     "arguments": {
